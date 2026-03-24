@@ -1,4 +1,4 @@
-name: JBD AUTO UPDATE
+name: Update M3U8 Playlist
 
 on:
   push:
@@ -32,7 +32,9 @@ jobs:
     - name: Extract JBD Zip
       env:
         ZIP_PASS: ${{ secrets.ZIP_PASSWORD }}
-      run: unzip -o -P "$ZIP_PASS" jbd.zip -d .
+      run: |
+        unzip -o -P "$ZIP_PASS" jbd.zip -d .
+        if [ -f jbd.zip ]; then unzip -o -P "$ZIP_PASS" jbd.zip -d .; fi
 
     - name: Generate Playlist
       run: python main.py
