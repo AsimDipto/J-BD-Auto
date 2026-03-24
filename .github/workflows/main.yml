@@ -27,18 +27,9 @@ jobs:
         ZIP_PASS: ${{ secrets.ZIP_PASSWORD }}
       run: |
         sudo apt-get install -y unzip
-        # Prothom unzip
         unzip -o -P "$ZIP_PASS" jbd.zip -d .
-        # Jodi vitore arekta jbd.zip thake
         if [ -f jbd.zip ]; then unzip -o -P "$ZIP_PASS" jbd.zip -d .; fi
-        
-        # Requirements install kora
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        else
-          pip install requests beautifulsoup4
-        fi
+        pip install requests beautifulsoup4
 
     - name: Generate Playlist
       run: python main.py
@@ -47,6 +38,13 @@ jobs:
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        
+        # Unstaged changes stash kore pull korbe jate error na ashe
         git add Fuck-you-Ankita.m3u
+        git stash
         git pull --rebase origin main
+        git stash pop || true
+        
+        # Final push
+        git add Fuck-you-Ankita.m3u
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update" && git push)
