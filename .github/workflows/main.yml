@@ -1,4 +1,4 @@
-name: Update 
+name: Update M3U8 Playlist
 
 on:
   push:
@@ -16,34 +16,37 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      with:
-        persist-credentials: true
 
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install Dependencies
-      run: |
-        sudo apt-get install -y unzip
-        pip install requests
-
-    - name: Extract and Run
+    - name: Extract and Install
       env:
         ZIP_PASS: ${{ secrets.ZIP_PASSWORD }}
       run: |
+        sudo apt-get install -y unzip
+        # Prothom unzip
         unzip -o -P "$ZIP_PASS" jbd.zip -d .
+        # Jodi vitore arekta jbd.zip thake
         if [ -f jbd.zip ]; then unzip -o -P "$ZIP_PASS" jbd.zip -d .; fi
-        python main.py
+        
+        # Requirements install kora
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        else
+          pip install requests beautifulsoup4
+        fi
+
+    - name: Generate Playlist
+      run: python main.py
 
     - name: Commit and Push
       run: |
         git config --global user.name 'github-actions[bot]'
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add Fuck-you-Ankita.m3u
-        
-        # Conflict thakle pull kore solve korbe
         git pull --rebase origin main
-        
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update" && git push)
