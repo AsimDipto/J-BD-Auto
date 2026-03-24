@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      packages: write
 
     steps:
     - name: Checkout repository
@@ -23,20 +22,18 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install Unzip and Dependencies
+    - name: Install Dependencies
       run: |
         sudo apt-get install -y unzip
         python -m pip install --upgrade pip
-        pip install requests  # Manually requests install kora holo jate error na ashe
+        pip install requests
 
     - name: Extract JBD Zip
       env:
         ZIP_PASS: ${{ secrets.ZIP_PASSWORD }}
       run: |
         unzip -o -P "$ZIP_PASS" jbd.zip -d .
-        # Jodi zip-er bhitore arekta zip thake
         if [ -f jbd.zip ]; then unzip -o -P "$ZIP_PASS" jbd.zip -d .; fi
-        # Extract korar por jodi requirements thake, install korbe
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Generate Playlist
@@ -48,19 +45,3 @@ jobs:
         git config --global user.email 'github-actions[bot]@users.noreply.github.com'
         git add Fuck-you-Ankita.m3u
         git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update playlist" && git push)
-
-    - name: Log in to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        push: true
-        tags: |
-          ghcr.io/${{ github.repository }}:latest
-          ghcr.io/${{ github.repository }}:${{ github.sha }}
